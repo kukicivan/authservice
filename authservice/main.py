@@ -1,96 +1,129 @@
-import os
-from typing import Optional
-
-from fastapi import Depends, FastAPI
+import databases
+import sqlalchemy
+from fastapi import FastAPI, Request, APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from starlette.responses import Response, RedirectResponse
+from fastapi_users import FastAPIUsers, models
+from fastapi_users.authentication import JWTAuthentication, BaseAuthentication, Authenticator
+from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
+from fastapi_users.router import ErrorCode
+from sqlalchemy import Sequence
+from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from starlette import status
+from starlette.exceptions import HTTPException
+from starlette.responses import Response
 
-from fastapi_login import LoginManager
-from fastapi_login.exceptions import InvalidCredentialsException
-
-fake_db = {
-    'john@doe.com': {
-        'name': 'John',
-        'surname': 'Doe',
-        'email': 'john@doe.com',
-        'password': 'hunter2'
-    },
-
-    'sandra@johnson.com': {
-        'name': 'Sandra',
-        'surname': 'Johnson',
-        'email': 'sandra@johnson.com',
-        'password': 'sandra1243'
-    }
-}
-SECRET = os.urandom(24).hex()
-TOKEN_URL = '/auth/token'
+DATABASE_URL = "sqlite:///./test.db"
+SECRET = "SECRET"
 
 
-def load_user(email: str):
-    user = fake_db.get(email)
-    if not user:
-        return None
-
-    return user
-
-
-class NotAuthenticatedException(Exception):
+class User(models.BaseUser):
     pass
 
 
-def handle_exc(request, exc):
-    print(request, exc)
-    return RedirectResponse(url='/redirect')
+class UserCreate(models.BaseUserCreate):
+    pass
 
 
-# app setup
+class UserUpdate(User, models.BaseUserUpdate):
+    pass
+
+
+class UserDB(User, models.BaseUserDB):
+    pass
+
+
+database = databases.Database(DATABASE_URL)
+Base: DeclarativeMeta = declarative_base()
+
+
+class UserTable(Base, SQLAlchemyBaseUserTable):
+    pass
+
+
+engine = sqlalchemy.create_engine(
+    DATABASE_URL, connect_args={"check_same_thread": False}
+)
+Base.metadata.create_all(engine)
+
+users = UserTable.__table__
+user_db = SQLAlchemyUserDatabase(UserDB, database, users)
+
+
+def on_after_register(user: UserDB, request: Request):
+    print(f"User {user.id} has registered.")
+
+
+def on_after_forgot_password(user: UserDB, token: str, request: Request):
+    print(f"User {user.id} has forgot their password. Reset token: {token}")
+
+
+jwt_authentication = JWTAuthentication(
+    secret=SECRET, lifetime_seconds=3600, tokenUrl="/auth/login"
+)
+
 app = FastAPI()
-app.add_exception_handler(NotAuthenticatedException, handle_exc)
-
-# Manager setup
-manager = LoginManager(SECRET, tokenUrl=TOKEN_URL)
-cookie_manager = LoginManager(SECRET, tokenUrl=TOKEN_URL, use_cookie=True)
-manager.user_loader(load_user)
-cookie_manager.user_loader(load_user)
-
-
-# routes
-
-@app.post(TOKEN_URL)
-def login(response: Response, data: OAuth2PasswordRequestForm = Depends(), cookie=Optional[bool]):
-    print(response)
-    print(data)
-    user_identifier = data.username
-    password = data.password
-
-    user = load_user(user_identifier)
-    if not user:
-        raise InvalidCredentialsException
-    elif password != user['password']:
-        raise InvalidCredentialsException
-
-    access_token = manager.create_access_token(
-        data=dict(sub=user_identifier)
-    )
-
-    if cookie:
-        manager.set_cookie(response, access_token)
-        return
-
-    return {'access_token': access_token, 'token_type': 'bearer'}
+fastapi_users = FastAPIUsers(
+    user_db,
+    [jwt_authentication],
+    User,
+    UserCreate,
+    UserUpdate,
+    UserDB,
+)
+app.include_router(
+    fastapi_users.get_auth_router(jwt_authentication), prefix="/auth", tags=["auth"]
+)
+app.include_router(
+    fastapi_users.get_register_router(on_after_register), prefix="/auth", tags=["auth"]
+)
+app.include_router(
+    fastapi_users.get_reset_password_router(
+        SECRET, after_forgot_password=on_after_forgot_password
+    ),
+    prefix="/auth",
+    tags=["auth"],
+)
+app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
 
 
-@app.get('/redirect')
-def redirected_here():
-    return {'data': 'redirected'}
+@app.on_event("startup")
+async def startup():
+    await database.connect()
 
 
-@app.get('/protected')
-def protected(_=Depends(manager)):
-    return {'status': 'Success'}
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
 
 
-@app.get('/protected/cookie')
-def protected_cookie(_=Depends(cookie_manager)):
-    return {'status': 'Success'}
+# router = APIRouter()
+backend = BaseAuthentication("base", True)
+# authenticator = Authenticator(backend, user_db)
+
+
+# def get_login_response(user, response):
+#     return user
+#
+#
+# @app.post("/login")
+# async def login(
+#         response: Response, credentials: OAuth2PasswordRequestForm = Depends()
+# ):
+#     user = await user_db.authenticate(credentials)
+#
+#     if user is None or not user.is_active:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
+#         )
+#
+#     print("Hello world from override login method with DB support!")
+#
+#     return await backend.get_login_response(user, response)
+
+# if backend.logout:
+#     @router.post("/logout")
+#     async def logout(
+#             response: Response, user=Depends(authenticator.get_current_active_user)
+#     ):
+#         return await backend.get_logout_response(user, response)
