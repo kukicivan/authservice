@@ -1,3 +1,6 @@
+import uuid
+from typing import Optional
+
 import databases
 import sqlalchemy
 from fastapi import FastAPI, Request, APIRouter, Depends
@@ -5,9 +8,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi_users import FastAPIUsers, models
 from fastapi_users.authentication import JWTAuthentication, BaseAuthentication, Authenticator
 from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
+from fastapi_users.db.sqlalchemy import GUID
 from fastapi_users.router import ErrorCode
-from sqlalchemy import Sequence
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from sqlalchemy import Sequence, Column, String, Boolean, Integer, ForeignKey
+from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base, declared_attr
 from starlette import status
 from starlette.exceptions import HTTPException
 from starlette.responses import Response
@@ -32,12 +36,68 @@ class UserDB(User, models.BaseUserDB):
     pass
 
 
+# TODO: Add table that will hold database token
+from pydantic import UUID4, BaseModel, EmailStr, validator
+
+
+class BaseToken(BaseModel):
+    """Base SQLAlchemy users table definition."""
+
+    # __tablename__ = "token"
+
+    """Base User model."""
+
+    id: Optional[UUID4] = None
+    email: Optional[EmailStr] = None
+    access_token: str
+    expires_at: int
+    refresh_token: Optional[str] = None
+
+    is_superuser: Optional[bool] = False
+
+    @validator("id", pre=True, always=True)
+    def default_id(cls, v):
+        return v or uuid.uuid4()
+
+    # id = Column(GUID, primary_key=True)
+
+    # Token
+    # access_token = Column(String(length=1024), nullable=False)
+    # expires_at = Column(Integer, nullable=False)
+    # refresh_token = Column(String(length=1024), nullable=True)
+
+    # Token properties
+    # blacklisted = Column(Boolean, default=False, nullable=True)
+    # created_at = Column(String(length=1024), nullable=True)
+    # updated_at = Column(String(length=1024), nullable=True)
+    # created_by = Column(GUID)
+    # updated_by = Column(GUID)
+
+    # Token data and user info
+    # token_data: Column(String(length=1024), nullable=True)
+    # user_email: Column(String(length=1024), nullable=True)
+    # is_superuser = Column(Boolean, default=False)
+
+    # TODO: Add ForeignKey on user.id attribute (with cascade delete)
+    # @declared_attr
+    # def user_id(cls):
+    #     return Column(GUID, ForeignKey("user.id", ondelete="cascade"), nullable=False)
+
+
+class Token(BaseToken):
+    pass
+
+
 database = databases.Database(DATABASE_URL)
 Base: DeclarativeMeta = declarative_base()
 
 
 class UserTable(Base, SQLAlchemyBaseUserTable):
     pass
+
+
+# class TokenTable(Base, Token):
+#     pass
 
 
 engine = sqlalchemy.create_engine(
@@ -95,9 +155,8 @@ async def startup():
 async def shutdown():
     await database.disconnect()
 
-
 # router = APIRouter()
-backend = BaseAuthentication("base", True)
+# backend = BaseAuthentication("base", True)
 # authenticator = Authenticator(backend, user_db)
 
 
@@ -127,3 +186,7 @@ backend = BaseAuthentication("base", True)
 #             response: Response, user=Depends(authenticator.get_current_active_user)
 #     ):
 #         return await backend.get_logout_response(user, response)
+
+# TODO: Override login to save token in Database
+# TODO: Test how token is checked on each request
+# TODO: Verify token against database token
