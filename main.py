@@ -10,6 +10,8 @@ from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
 from authservice import models, routes
 from authservice.database import database, engine
 
+from fastapi.middleware.cors import CORSMiddleware
+
 
 class UserTable(models.Base, SQLAlchemyBaseUserTable):
     pass
@@ -28,6 +30,21 @@ app: FastAPI = FastAPI(
     version="0.0.1",
     docs_url="/",
     redoc_url="/redoc"
+)
+
+origins = [
+    "http://localhost.tiangolo.com",
+    "https://localhost.tiangolo.com",
+    "http://localhost",
+    "http://localhost:8080",
+    "http://localhost:4200",
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
