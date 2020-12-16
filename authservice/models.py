@@ -1,26 +1,38 @@
+from fastapi_users import models
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
 from .database import Base
 
 
-class User(Base):
-    __tablename__ = "users"
+class User(models.BaseUser):
+    pass
+
+
+class UserCreate(models.BaseUserCreate):
+    pass
+
+
+class UserUpdate(User, models.BaseUserUpdate):
+    pass
+
+
+class UserDB(User, models.BaseUserDB):
+    pass
+
+
+class Token(Base):
+    __tablename__ = "token"
 
     id = Column(Integer, primary_key=True, index=True)
-    email = Column(String, unique=True, index=True)
-    hashed_password = Column(String)
-    is_active = Column(Boolean, default=True)
 
-    items = relationship("Item", back_populates="owner")
+    # Token
+    access_token = Column(String(length=1024), nullable=False)
+    expires_at = Column(Integer, nullable=True)
+    refresh_token = Column(String(length=1024), nullable=True)
 
+    # Token properties
+    blacklisted = Column(Boolean, default=False, nullable=True)
 
-class Item(Base):
-    __tablename__ = "items"
-
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    owner_id = Column(Integer, ForeignKey("users.id"))
-
-    owner = relationship("User", back_populates="items")
+    # Token data and user info
+    token_data: Column(String(length=1024), nullable=True)

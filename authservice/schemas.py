@@ -1,23 +1,6 @@
 from typing import List, Optional
 
-from pydantic import BaseModel
-
-
-class ItemBase(BaseModel):
-    title: str
-    description: Optional[str] = None
-
-
-class ItemCreate(ItemBase):
-    pass
-
-
-class Item(ItemBase):
-    id: int
-    owner_id: int
-
-    class Config:
-        orm_mode = True
+from pydantic import BaseModel, EmailStr, validator
 
 
 class UserBase(BaseModel):
@@ -31,7 +14,29 @@ class UserCreate(UserBase):
 class User(UserBase):
     id: int
     is_active: bool
-    items: List[Item] = []
 
     class Config:
         orm_mode = True
+
+
+class TokenBase(BaseModel):
+    access_token: str
+    expires_at: Optional[int]
+    refresh_token: Optional[str]
+
+    # Token
+    blacklisted: Optional[bool]
+
+    # Token properties
+    token_data: Optional[str]
+
+
+class Token(TokenBase):
+    id: int
+
+    class Config:
+        orm_mode = True
+
+
+class TokenCreate(TokenBase):
+    pass
