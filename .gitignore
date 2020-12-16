@@ -112,3 +112,6 @@ ENV/
 
 # pycharm
 .idea/
+
+# SqlLite database
+/*.db
