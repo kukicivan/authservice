@@ -1,10 +1,10 @@
-from typing import List, Optional
+from typing import Optional
 
-from pydantic import BaseModel, EmailStr, validator
+from pydantic import BaseModel, EmailStr
 
 
 class UserBase(BaseModel):
-    email: str
+    email: EmailStr
 
 
 class UserCreate(UserBase):
@@ -21,14 +21,10 @@ class User(UserBase):
 
 class TokenBase(BaseModel):
     access_token: str
-    expires_at: Optional[int]
-    refresh_token: Optional[str]
-
-    # Token
+    exp: Optional[int]
+    sub: Optional[str]
     blacklisted: Optional[bool]
-
-    # Token properties
-    token_data: Optional[str]
+    user_id: Optional[str]
 
 
 class Token(TokenBase):
@@ -40,3 +36,7 @@ class Token(TokenBase):
 
 class TokenCreate(TokenBase):
     pass
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
