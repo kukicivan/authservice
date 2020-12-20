@@ -9,11 +9,13 @@ from sqlalchemy.orm import Session
 
 from authservice import crud
 from authservice.security.exceptions import InvalidCredentialsException
-from authservice.login_manager import manager
 from authservice.schemas import TokenBase
+from fastapi_users.utils import generate_jwt
 
 SECRET = os.getenv("SECRET")
 pwd_context = CryptContext(schemes=["bcrypt"])
+token_audience: str = "fastapi-users:auth"
+JWT_ALGORITHM = "HS256"
 
 
 class JWTEnum(str, Enum):
@@ -47,21 +49,25 @@ def authenticator(db: Session, form_data: OAuth2PasswordRequestForm):
     if not verified:
         raise InvalidCredentialsException
 
-    access_token = manager.create_access_token(
-        data=dict(sub=form_data.username)
+    data = {"user_id": str(user.id), "aud": token_audience}
+    jwt_token = generate_jwt(data, 3600, SECRET)
+
+    # decode token to get expiration (exp)
+    payload = jwt.decode(
+        jwt_token,
+        SECRET,
+        audience=token_audience,
+        algorithms=[JWT_ALGORITHM],
     )
 
-    # decode token to get user_identifier (sub)
-    payload = jwt.decode(access_token, SECRET)
-
     token: TokenBase = TokenBase(
-        access_token=access_token,
+        access_token=jwt_token,
         exp=payload.get("exp"),
-        sub=payload.get("sub"),
+        sub=user.email,
         user_id=str(user.id) if user.id else str(99)
     )
 
     # save token in the database
     crud.add_jwt_in_db(db, token)
 
-    return {'access_token': access_token, 'token_type': 'bearer'}
+    return {'access_token': jwt_token, 'token_type': 'bearer'}
