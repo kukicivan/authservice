@@ -1,6 +1,6 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, UUID4
 
 
 class UserBase(BaseModel):
@@ -12,31 +12,8 @@ class UserCreate(UserBase):
 
 
 class User(UserBase):
-    id: int
-    is_active: bool
+    id: UUID4
+    is_active: Optional[bool]
 
     class Config:
         orm_mode = True
-
-
-class TokenBase(BaseModel):
-    access_token: str
-    exp: Optional[int]
-    sub: Optional[str]
-    blacklisted: Optional[bool]
-    user_id: Optional[str]
-
-
-class Token(TokenBase):
-    id: int
-
-    class Config:
-        orm_mode = True
-
-
-class TokenCreate(TokenBase):
-    pass
-
-
-class TokenData(BaseModel):
-    username: Optional[str] = None
