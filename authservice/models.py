@@ -3,9 +3,7 @@ from typing import Any
 import databases
 from fastapi_users import models
 from fastapi_users.db import SQLAlchemyBaseUserTable, SQLAlchemyUserDatabase
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
-from sqlalchemy.orm import relationship
 
 from authservice.database import SQLALCHEMY_DATABASE_URL
 
@@ -31,21 +29,6 @@ class UserDB(User, models.BaseUserDB):
 
 class UserTable(Base, SQLAlchemyBaseUserTable):
     pass
-
-
-class Token(Base):
-    __tablename__ = "token"
-
-    id = Column(Integer, primary_key=True, index=True)
-
-    access_token = Column(String(length=1024), nullable=False)
-    exp = Column(Integer, nullable=True)
-    sub = Column(String(length=1024), nullable=True)
-    blacklisted = Column(Boolean, default=False)
-
-    user_id = Column(String(length=1024), nullable=True)
-    # user_id = Column(String(length=1024), ForeignKey('user.id'))
-    # user = relationship("user", back_populates='token')
 
 
 def migrate(engine: Any):
