@@ -19,8 +19,8 @@ that needs authentication and user management system.
     * [X] POST `/auth/register`
     * [X] POST `/auth/forgot-password`
     * [X] POST `/auth/reset-password`
+  
 * [X] **Users**
-
     * [X] GET `/users/me`
     * [X] PATCH `/users/me`
     * [X] GET `/users/{id}`
