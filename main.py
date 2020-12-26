@@ -1,7 +1,6 @@
 import os
 from urllib.request import Request
 
-import uvicorn
 from fastapi import FastAPI
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
@@ -15,13 +14,7 @@ from authservice.models import migrate
 # Create DB
 user_db = migrate(engine)
 
-# Create JWT Authentication Backend
-SECRET = os.getenv("SECRET")
-jwt_authentication = JWTAuthentication(
-    secret=SECRET, lifetime_seconds=3600, tokenUrl="/auth/login"
-)
-
-# Initialize Fast API
+# Initialize Fast API framework
 app: FastAPI = FastAPI(
     title="Authentication service",
     description="This is a very fancy Authentication project built in Fast API. "
@@ -46,10 +39,11 @@ def on_after_forgot_password(user: models.UserDB, token: str, request: Request):
     return token
 
 
-# Create Fast API Users
+# Initialize Fast API users with JWT backend
+jwt_auth_backend = JWTAuthentication(secret=os.getenv("SECRET"), lifetime_seconds=3600, tokenUrl="/auth/login")
 auth_service = FastAPIUsers(
     user_db,
-    [jwt_authentication],
+    [jwt_auth_backend],
     models.User,
     models.UserCreate,
     models.UserUpdate,
@@ -57,9 +51,9 @@ auth_service = FastAPIUsers(
 )
 
 # Add Login route
-# app.include_router(
-#     auth_service.get_auth_router(jwt_authentication), prefix="/auth", tags=["auth"]
-# )
+app.include_router(
+    auth_service.get_auth_router(jwt_auth_backend), prefix="/auth", tags=["auth"]
+)
 
 # Add Register route
 app.include_router(
@@ -69,12 +63,5 @@ app.include_router(
 # Add Users routes
 app.include_router(auth_service.get_users_router(), prefix="/users", tags=["users"])
 
-# Add Admin routes
-app.include_router(routes.login_router)
-app.include_router(routes.users_list_router)
-app.include_router(routes.admin)
-
-# Used for debugger only
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-    print("Run uvicorn server for debugger.")
+# Add Users list route
+app.include_router(routes.users_router)

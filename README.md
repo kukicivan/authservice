@@ -1,50 +1,47 @@
-# Authentication Service with Fast API
+# Authentication service with Fast API
 
 <p align="center">
     <em>Ready-to-use Authentication and Users Management backend.</em>
 </p>
 
 ---
-**Repository URL**: <a href="https://gitlab.com/ivan.kukic/authservice" target="_blank">
+**URL**: <a href="https://gitlab.com/ivan.kukic/authservice" target="_blank">
 gitlab.com/ivan.kukic/authservice</a>
 ---
 
-Authentication service provides **authentication** and **user management** supports. Therefore, it can be used by any
-software project that needs to implement some kind of authentication mechanism and basic user management system in
-place.
-
-Authentication service is build on top of **FastAPI** framework. **FastAPI** is high performance framework build in **Python**.
+Authentication service provides **authentication** and **user management** out of the box. It can be used by project
+that needs authentication and user management system.
 
 ## Features
 
-* [X] Ready-to-use **register**, **login**, **forgot** and **reset password** endpoints
+* [X] **Authentication**
     * [X] POST `/auth/login`
     * [X] POST `/auth/register`
     * [X] POST `/auth/forgot-password`
     * [X] POST `/auth/reset-password`
-* [X] Ready-to-use **user profile** routes
+* [X] **Users**
+
     * [X] GET `/users/me`
     * [X] PATCH `/users/me`
     * [X] GET `/users/{id}`
     * [X] DELETE `/users/{id}`
     * [X] PATCH `/users/{id}`
-* [X] High performance **FastAPI** framework
-* [X] Database backend with **SQLAlchemy**
-* [X] Authentication backend with **FastAPI Users**
-* [X] Writes **JWT token in a database**
+    * [X] GET `/users`
+
+* [X] Under the hood
+    * [X]  **FastAPI** framework
+    * [X] **JWT** Authentication
+    * [X] **SQL Alchemy**
 
 ## Install
 
 ### Setup environement
 
-You should have [Pipenv](https://pipenv.readthedocs.io/en/latest/) installed. Then, you can install the dependencies
-with:
+`Activate` the virtual environment. Then, you can install the dependencies with:
 
 ```bash
-pipenv install --dev
+pip install -r requirements.txt
 ```
-
-After that, `activate` the virtual environment:
 
 ### Configure
 
