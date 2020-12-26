@@ -14,21 +14,19 @@ that needs authentication and user management system.
 
 ## Features
 
-* [X] **Authentication**
+*  **Authentication**
     * [X] POST `/auth/login`
     * [X] POST `/auth/register`
     * [X] POST `/auth/forgot-password`
     * [X] POST `/auth/reset-password`
-* [X] **Users**
-
+*  **Users**
     * [X] GET `/users/me`
     * [X] PATCH `/users/me`
     * [X] GET `/users/{id}`
     * [X] DELETE `/users/{id}`
     * [X] PATCH `/users/{id}`
     * [X] GET `/users`
-
-* [X] Under the hood
+*  Under the hood
     * [X]  **FastAPI** framework
     * [X] **JWT** Authentication
     * [X] **SQL Alchemy**
