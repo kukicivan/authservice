@@ -12,14 +12,14 @@ from authservice.security.exceptions import InvalidCredentialsException
 from authservice.schemas import TokenBase
 from fastapi_users.utils import generate_jwt
 
-SECRET = os.getenv("SECRET")
+
+class JWTToken(str, Enum):
+    algorithm = "HS256"
+    audience = "fastapi-users:auth"
+    secret = os.getenv("SECRET")
+
+
 pwd_context = CryptContext(schemes=["bcrypt"])
-token_audience: str = "fastapi-users:auth"
-JWT_ALGORITHM = "HS256"
-
-
-class JWTEnum(str, Enum):
-    bearer = "Bearer <secret_token>"
 
 
 def verify_password(plain_password, hashed_password):
@@ -49,22 +49,22 @@ def authenticator(db: Session, form_data: OAuth2PasswordRequestForm):
     if not verified:
         raise InvalidCredentialsException
 
-    data = {"user_id": str(user.id), "aud": token_audience}
-    jwt_token = generate_jwt(data, 3600, SECRET)
+    data = {"user_id": str(user.id), "aud": JWTToken.audience}
+    jwt_token = generate_jwt(data, 3600, JWTToken.secret)
 
     # decode token to get expiration (exp)
     payload = jwt.decode(
         jwt_token,
-        SECRET,
-        audience=token_audience,
-        algorithms=[JWT_ALGORITHM],
+        JWTToken.secret,
+        audience=JWTToken.audience,
+        algorithms=[JWTToken.algorithm],
     )
 
     token: TokenBase = TokenBase(
         access_token=jwt_token,
         exp=payload.get("exp"),
         sub=user.email,
-        user_id=str(user.id) if user.id else str(99)
+        user_id=str(user.id) if user.id else None
     )
 
     # save token in the database
