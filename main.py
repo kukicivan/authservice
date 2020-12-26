@@ -70,12 +70,9 @@ app.include_router(
 app.include_router(auth_service.get_users_router(), prefix="/users", tags=["users"])
 
 # Add Admin routes
-app.include_router(routes.router)
-app.include_router(routes.users_router)
+app.include_router(routes.login_router)
+app.include_router(routes.users_list_router)
 app.include_router(routes.admin)
-
-# App started
-print("INFO:     Auth service started")
 
 # Used for debugger only
 if __name__ == "__main__":

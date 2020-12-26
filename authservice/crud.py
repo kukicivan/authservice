@@ -28,7 +28,7 @@ def get_tokens(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Token).offset(skip).limit(limit).all()
 
 
-def get_tokens_by_id(db: Session, token_id: int):
+def get_token_by_id(db: Session, token_id: int):
     return db.query(models.Token).filter(models.Token.id == token_id).first()
 
 

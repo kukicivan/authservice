@@ -11,12 +11,12 @@ from authservice.schemas import User, Token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
-router = APIRouter(
+login_router = APIRouter(
     prefix="",
     tags=["auth"],
 )
 
-users_router = APIRouter(
+users_list_router = APIRouter(
     prefix="/users",
     tags=["users"],
 )
@@ -27,7 +27,7 @@ admin = APIRouter(
 )
 
 
-@users_router.get("/", response_model=List[User])
+@users_list_router.get("/", response_model=List[User])
 def read_users(
         skip: int = 0,
         limit: int = 100,
@@ -70,7 +70,7 @@ def read_token(
 
            - **id**: ID of the token
            """
-    token = crud.get_tokens_by_id(db, id)
+    token = crud.get_token_by_id(db, id)
 
     if token:
         return token
@@ -81,6 +81,6 @@ def read_token(
 # Override login to save token in the database
 # TODO: Test how token is verified on each request
 # TODO: Verify token against database token
-@router.post("/auth/login")
+@login_router.post("/auth/login")
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     return authenticator(db, form_data)
