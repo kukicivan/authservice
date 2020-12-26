@@ -34,13 +34,11 @@ that needs authentication and user management system.
 
 ### Setup environement
 
-You should have [pip](https://pip.pypa.io/en/stable/installing/) installed. Then, you can install the dependencies with:
+`Activate` the virtual environment. Then, you can install the dependencies with:
 
 ```bash
 pip install -r requirements.txt
 ```
-
-After that, `activate` the virtual environment:
 
 ### Configure
 
