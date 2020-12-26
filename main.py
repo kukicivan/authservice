@@ -1,7 +1,6 @@
 import os
 from urllib.request import Request
 
-import uvicorn
 from fastapi import FastAPI
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
@@ -66,8 +65,3 @@ app.include_router(auth_service.get_users_router(), prefix="/users", tags=["user
 
 # Add Users list route
 app.include_router(routes.users_router)
-
-# Used for debugger only
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-    print("Run uvicorn server for debugger.")

@@ -1,4 +1,4 @@
-# Authentication Service with Fast API
+# Authentication service with Fast API
 
 <p align="center">
     <em>Ready-to-use Authentication and Users Management backend.</em>
@@ -20,11 +20,14 @@ that needs authentication and user management system.
     * [X] POST `/auth/forgot-password`
     * [X] POST `/auth/reset-password`
 * [X] **Users**
+
     * [X] GET `/users/me`
     * [X] PATCH `/users/me`
     * [X] GET `/users/{id}`
     * [X] DELETE `/users/{id}`
     * [X] PATCH `/users/{id}`
+    * [X] GET `/users`
+
 * [X] Under the hood
     * [X]  **FastAPI** framework
     * [X] **JWT** Authentication

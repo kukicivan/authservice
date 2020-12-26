@@ -2,10 +2,9 @@ import os
 from pathlib import Path
 
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
-
-# Reads the key-value pair from .env file
 from sqlalchemy.orm import sessionmaker
+
+from dotenv import load_dotenv
 
 # Load .env
 env_path = Path('.') / '.env'
