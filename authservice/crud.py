@@ -1,10 +1,16 @@
+from typing import Any
+
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import select
 
 from . import models
 
 
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(models.UserTable).offset(skip).limit(limit).all()
+async def get_users(db: Any, skip: int = 0, limit: int = 100) -> object:
+    # Fetch multiple rows
+    query = "SELECT * FROM user"
+    rows = await db.fetch_all(query=query)
+    return rows
 
 
 def get_user_by_id(db: Session, user_id: str):
