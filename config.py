@@ -1,1 +1,1 @@
-ENVIRONMENT = 'dev.env'
+ENVIRONMENT = 'prod.env'
