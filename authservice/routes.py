@@ -17,7 +17,7 @@ users_router = APIRouter(
 
 
 @users_router.get("/", response_model=List[User])
-def read_users(
+async def read_users(
         skip: int = 0,
         limit: int = 100,
         db: Session = Depends(get_db),
@@ -29,5 +29,5 @@ def read_users(
            - **skip**: Number of records to be skipped
            - **limit**: Limit number of records that are returned from the request
            """
-    users = crud.get_users(db, skip=skip, limit=limit)
+    users = await crud.get_users(db, skip=skip, limit=limit)
     return users

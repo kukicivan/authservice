@@ -4,15 +4,13 @@ from urllib.request import Request
 from fastapi import FastAPI
 from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
+from fastapi_users.db import SQLAlchemyUserDatabase
 
 from authservice import models, routes
-from authservice.database import engine
+from authservice.database import SqlAlchemyEngine, database
 
 from authservice.middleware import add_middleware
-from authservice.models import migrate
-
-# Create DB
-user_db = migrate(engine)
+from authservice.models import migrate, UserTable, UserDB
 
 # Initialize Fast API framework
 app: FastAPI = FastAPI(
@@ -40,7 +38,16 @@ def on_after_forgot_password(user: models.UserDB, token: str, request: Request):
 
 
 # Initialize Fast API users with JWT backend
+users = UserTable.__table__
+user_db = SQLAlchemyUserDatabase(UserDB, database, users)
+
+# Create DB
+migrate(SqlAlchemyEngine)
+
+# Create auth backend
 jwt_auth_backend = JWTAuthentication(secret=os.getenv("SECRET"), lifetime_seconds=3600, tokenUrl="/auth/login")
+
+# Initialize auth service
 auth_service = FastAPIUsers(
     user_db,
     [jwt_auth_backend],
@@ -65,3 +72,13 @@ app.include_router(auth_service.get_users_router(), prefix="/users", tags=["user
 
 # Add Users list route
 app.include_router(routes.users_router)
+
+
+@app.on_event("startup")
+async def startup():
+    await database.connect()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await database.disconnect()
