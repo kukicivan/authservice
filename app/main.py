@@ -6,7 +6,8 @@ from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import JWTAuthentication
 from fastapi_users.db import SQLAlchemyUserDatabase
 
-from authservice import models, routes
+from authservice import models
+from authservice import routes
 from authservice.database import SqlAlchemyEngine, database
 
 from authservice.middleware import add_middleware
