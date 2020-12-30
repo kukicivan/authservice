@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import select
 
-from . import models
+from authservice import models
 
 
 async def get_users(db: Any, skip: int = 0, limit: int = 100) -> object:
