@@ -3,9 +3,8 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from typing import List
 
-from authservice import crud
+from authservice.crud import get_users
 from authservice.database import get_db
-
 from authservice.schemas import User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -29,5 +28,5 @@ async def read_users(
            - **skip**: Number of records to be skipped
            - **limit**: Limit number of records that are returned from the request
            """
-    users = await crud.get_users(db, skip=skip, limit=limit)
+    users = await get_users(db, skip=skip, limit=limit)
     return users

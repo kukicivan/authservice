@@ -7,9 +7,9 @@ from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from databases import Database
 
+# Load .env
 import config
 
-# Load .env
 env_path = Path('.') / config.ENVIRONMENT
 load_dotenv(dotenv_path=env_path, verbose=True)
 
