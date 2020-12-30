@@ -4,7 +4,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 def add_middleware(app: FastAPI):
     origins = [
-        "http://localhost:4200",
+        "*",
     ]
     app.add_middleware(
         CORSMiddleware,
