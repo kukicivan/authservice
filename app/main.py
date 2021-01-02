@@ -8,10 +8,10 @@ from fastapi_users.db import SQLAlchemyUserDatabase
 
 from authservice import models
 from authservice import routes
-from authservice.database import SqlAlchemyEngine, database
-
-from authservice.middleware import add_middleware
 from authservice.models import migrate, UserTable, UserDB
+
+from core.middleware import add_middleware
+from core.database import SqlAlchemyEngine, database
 
 # Initialize Fast API framework
 app: FastAPI = FastAPI(

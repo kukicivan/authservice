@@ -1,13 +1,11 @@
 from fastapi import APIRouter, Depends
-from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from typing import List
 
-from authservice.crud import get_users
-from authservice.database import get_db
+from core.database import get_db
+from authservice.auth import oauth2_scheme
 from authservice.schemas import User
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+from authservice.crud import get_users
 
 users_router = APIRouter(
     prefix="/users",
