@@ -13,7 +13,7 @@ idna==2.10
 makefun==1.9.5
 mysqlclient==2.0.2
 passlib==1.7.4
-protobuf==3.14.0
+protobuf==3.18.3
 pycparser==2.20
 pydantic==1.7.3
 PyJWT==1.7.1
